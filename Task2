@@ -1,0 +1,43 @@
+/*In this example, I have used Q-learning, which involves the agent learning a Q-table to map actions to rewards for each state in the environment.*/
+
+import gym
+import numpy as np
+
+# Create the environment
+env = gym.make("FrozenLake-v1", is_slippery=False)  # Use 'FrozenLake-v1' with deterministic transitions
+
+# Initialize Q-table with zeros
+state_space = env.observation_space.n
+action_space = env.action_space.n
+Q = np.zeros((state_space, action_space))
+
+# Hyperparameters
+alpha = 0.1  # Learning rate
+gamma = 0.99  # Discount factor
+epsilon = 0.1  # Exploration rate
+num_episodes = 1000
+
+# Q-learning algorithm
+for episode in range(num_episodes):
+    state = env.reset()  # Reset environment and get initial state
+    done = False
+
+    while not done:
+        # Choose an action (epsilon-greedy strategy)
+        if np.random.rand() < epsilon:
+            action = env.action_space.sample()  # Explore: choose a random action
+        else:
+            action = np.argmax(Q[state, :])  # Exploit: choose the action with the highest Q-value
+
+        # Take the action and observe the new state and reward
+        next_state, reward, done, _ = env.step(action)  # Get the next state and reward
+
+        # Update Q-value using the Bellman equation
+        Q[state, action] = Q[state, action] + alpha * (reward + gamma * np.max(Q[next_state, :]) - Q[state, action])
+
+        # Move to the next state
+        state = next_state
+
+# Display the learned Q-table
+print("Learned Q-table:")
+print(Q)
